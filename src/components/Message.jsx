@@ -1,39 +1,52 @@
+import { useEffect } from "react";
+import api from "../axiosIndersptor";
+import useConversation from "../zustand/userConversation";
 
 const Message = () => {
-  return (
-    <>
-    <div className=" chat chat-start">
-    <div className="chat-image avatar">
-      <div className="w-10 rounded-full">
-        <img alt="Tailwind CSS chat bubble component" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-      </div>
-    </div>
-    <div className="chat-header">
-      Obi-Wan Kenobi
-      <time className="text-xs opacity-50">12:45</time>
-    </div>
-    <div className="chat-bubble">You were the Chosen One!</div>
-    <div className="chat-footer opacity-50">
-      Delivered
-    </div>
-  </div>
-  <div className="chat chat-end">
-    <div className="chat-image avatar">
-      <div className="w-10 rounded-full">
-        <img alt="Tailwind CSS chat bubble component" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-      </div>
-    </div>
-    <div className="chat-header">
-      Anakin
-      <time className="text-xs opacity-50">12:46</time>
-    </div>
-    <div className="chat-bubble">I hate you!</div>
-    <div className="chat-footer opacity-50">
-      Seen at 12:46
-    </div>
-  </div>
-  </>
-  )
-}
+  const { messages, setMessages, selectedConversation } = useConversation();
+ 
 
-export default Message
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        if (selectedConversation && selectedConversation._id) {
+          const response = await api.get(`/messages/send/${selectedConversation._id}`);
+          if (response.status === 200) {
+            setMessages(response.data.messages || []);
+          }
+          console.log(response.data.messages);
+        }
+      } catch (error) {
+        console.log(error.message, 'error in get messages');
+      }
+    };
+
+    getMessages();
+  }, [selectedConversation, setMessages]);
+
+
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return <div className="h-screen overflow-hidden flex justify-center items-center opacity-25">No messages yet.</div>;
+  }
+  return (
+    <div className="h-screen overflow-auto">
+      {Array.isArray(messages) && messages.map((message) => (
+        <div key={message._id} className={`chat ${message.senderId === selectedConversation._id ? 'chat-start' : 'chat-end'}`}>
+          <div className="chat-image avatar">
+            <div className="w-10 rounded-full">
+              <img alt="Avatar" src={message.avatarUrl || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"} />
+            </div>
+          </div>
+          <div className="chat-header">
+           
+            <time className="text-xs opacity-50">{new Date(message.createdAt).toLocaleTimeString()}</time>
+          </div>
+          <div className="chat-bubble">{message.message}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Message;

@@ -1,16 +1,21 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import api from '../axiosIndersptor';
+import { useAuthContext } from '../context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const {setAuthUser}=useAuthContext();
     const handleLogin = async ()=>{
         try {
             const response = await api.post('/auth/login',{email,password})
+            console.log(response)
             if(response.status===200){
                 localStorage.setItem('token',response.data.token)
+                localStorage.setItem('chat-user',JSON.stringify(response.data.user))
+                setAuthUser(response.data.user)
                 navigate('/')
             }
             console.log(response)

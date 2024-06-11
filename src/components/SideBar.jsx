@@ -16,29 +16,30 @@ import useConversation from '../zustand/userConversation';
 const drawerWidth = 240;
 
 const SideBar = () => {
-    const [users,setUsers]=React.useState([])
-    const {selectedConversation, setSelectedConversation } = useConversation();
-    React.useEffect(()=>{
-        const fetchUsers = async ()=>{
-            try {
-                const response = await api.get('/users/sidebar')
-                if(response.status===200){
-                    setUsers(response.data.filterUsers)
-                }
-            } catch (error) {
-                console.log(error.message)
-            }
+  const [users, setUsers] = React.useState([]);
+  const { setSelectedConversation } = useConversation();
+
+  React.useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get('/users/sidebar');
+        if (response.status === 200) {
+          setUsers(response.data.filterUsers);
         }
-        fetchUsers()
-    },[])
-    const handleUserClick = (user) => {
-        setSelectedConversation(user);
-        console.log(selectedConversation,'hiii')
+      } catch (error) {
+        console.log(error.message);
+      }
     };
+    fetchUsers();
+  }, []);
+
+  const handleUserClick = (user) => {
+    setSelectedConversation(user);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-     
       <Drawer
         variant="permanent"
         sx={{
@@ -50,24 +51,22 @@ const SideBar = () => {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {users.map((text) => (
-              <ListItem key={text._id} disablePadding>
-                <ListItemButton onClick={() => handleUserClick(text)}>
+            {users.map((user) => (
+              <ListItem key={user._id} disablePadding>
+                <ListItemButton onClick={() => handleUserClick(user)}>
                   <ListItemIcon>
-                    {<FaUserAlt />}
+                    <FaUserAlt />
                   </ListItemIcon>
-                  <ListItemText primary={text.name} />
+                  <ListItemText primary={user.name} />
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
           <Divider />
-        
         </Box>
       </Drawer>
-     
     </Box>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;
